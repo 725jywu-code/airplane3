@@ -86,3 +86,16 @@ self.top_frame = tk.Frame(root, pady=10)
         self.preview_canvas.pack()
 
         self.ask_start_game()  # 啟動遊戲設定流程
+
+def _init_grid_ui(self):
+        for r in range(GRID_SIZE):
+            for c in range(GRID_SIZE):
+                btn = tk.Button(
+                    self.game_frame,
+                    width=4,
+                    height=2,
+                    bg=COLOR_DEFAULT,
+                    command=lambda row=r, col=c: self.on_click(row, col)
+                )
+                btn.grid(row=r, column=c, padx=1, pady=1)
+                self.buttons[r][c] = btn
