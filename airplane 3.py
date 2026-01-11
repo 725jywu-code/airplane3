@@ -148,3 +148,63 @@ def ask_start_game(self):
 
         self.place_planes(num_planes)   # 放置飛機
         self.draw_plane_previews()      # 繪製預覽
+
+ def generate_random_shape(self):
+        shape = [(0, 0), (0, 1)]  # 機頭 + 第一節機身
+        body_len = random.randint(2, 4)
+        wing_len = random.randint(1, 3)
+
+        for i in range(2, body_len + 1):
+            shape.append((0, i))  # 機身延伸
+
+        for i in range(1, wing_len + 1):
+            shape.append((-i, 1))  # 左翅
+            shape.append((i, 1))   # 右翅
+
+        if random.choice([True, False]):
+            shape.append((-1, body_len))
+            shape.append((1, body_len))
+
+        return shape
+
+    def rotate_shape(self, shape, angle):
+        rotated = []
+        for x, y in shape:
+            if angle == 90:
+                rotated.append((-y, x))
+            elif angle == 180:
+                rotated.append((-x, -y))
+            elif angle == 270:
+                rotated.append((y, -x))
+            else:
+                rotated.append((x, y))
+        return rotated
+
+    def place_planes(self, count):
+        placed = 0
+        while placed < count:
+            shape = self.rotate_shape(
+                self.generate_random_shape(),
+                random.choice([0, 90, 180, 270])
+            )
+            r = random.randint(0, GRID_SIZE - 1)
+            c = random.randint(0, GRID_SIZE - 1)
+
+            if self.is_valid_position(r, c, shape):
+                self.add_plane_to_grid(r, c, shape)
+                self.planes.append(shape)
+                placed += 1
+
+    def is_valid_position(self, r, c, shape):
+        for dx, dy in shape:
+            nr, nc = r + dy, c + dx
+            if not (0 <= nr < GRID_SIZE and 0 <= nc < GRID_SIZE):
+                return False
+            if self.grid_data[nr][nc] is not None:
+                return False
+        return True
+
+    def add_plane_to_grid(self, r, c, shape):
+        for i, (dx, dy) in enumerate(shape):
+            nr, nc = r + dy, c + dx
+            self.grid_data[nr][nc] = 'H' if i == 0 else 'B'
