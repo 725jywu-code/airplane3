@@ -246,4 +246,36 @@ def on_click(self, r, c):
 
         btn.config(state=tk.DISABLED)
 
+def draw_plane_previews(self):
+        y = 30
+        for idx, shape in enumerate(self.planes):
+            self.preview_canvas.create_text(75, y, text=f"飛機 {idx + 1}")
+            y += 20
+            for i, (dx, dy) in enumerate(shape):
+                x = 75 + dx * PREVIEW_CELL_SIZE
+                yy = y + dy * PREVIEW_CELL_SIZE
+                color = COLOR_HEAD if i == 0 else COLOR_BODY
+                self.preview_canvas.create_rectangle(
+                    x - 10, yy - 10, x + 10, yy + 10, fill=color
+                )
+            y += 80
+
+    def use_bomb(self):
+        if self.bomb_available <= 0 or self.game_over:
+            return
+
+        r = simpledialog.askinteger("炸彈", "輸入行 (0-9):", minvalue=0, maxvalue=9)
+        c = simpledialog.askinteger("炸彈", "輸入列 (0-9):", minvalue=0, maxvalue=9)
+        if r is None or c is None:
+            return
+
+        self.bomb_available = 0
+        self.btn_bomb.config(text="使用炸彈 (0)", state=tk.DISABLED)
+
+        for dr in range(2):
+            for dc in range(2):
+                nr, nc = r + dr, c + dc
+                if 0 <= nr < GRID_SIZE and 0 <= nc < GRID_SIZE:
+                    self.reveal_cell(nr, nc)
+
 
