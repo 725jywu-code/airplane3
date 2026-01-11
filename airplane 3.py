@@ -165,7 +165,6 @@ class PlaneGame:
         self.start_game(num, max_steps)
 
     def start_game(self, num_planes, max_steps):
-        # 重置遊戲狀態
         self.max_steps = max_steps
         self.steps = 0
         self.total_heads = num_planes
@@ -173,22 +172,22 @@ class PlaneGame:
         self.planes.clear()
         self.bomb_available = 1
         self.game_over = False
-
-        # 更新 UI
+        
+        self.is_bombing = False 
         self.lbl_steps.config(text=f"步數: 0 / 上限: {self.max_steps}")
         self.lbl_heads.config(text=f"剩餘機頭: {self.total_heads}")
-        self.btn_bomb.config(text="使用炸彈 (1)", state=tk.NORMAL)
+    
+        self.btn_bomb.config(text="使用炸彈 (1)", state=tk.NORMAL, bg="SystemButtonFace", relief="raised")
+        
         self.preview_canvas.delete("all")
 
-        # 清空棋盤
         for r in range(GRID_SIZE):
             for c in range(GRID_SIZE):
                 self.grid_data[r][c] = None
-                self.buttons[r][c].config(bg=COLOR_DEFAULT, state=tk.NORMAL, text="")
+                self.buttons[r][c].config(bg=COLOR_DEFAULT, state=tk.NORMAL, text="", relief="raised")
 
         self.place_planes(num_planes)   # 放置飛機
         self.draw_plane_previews()      # 繪製預覽
-
 
     # ========================================================
     # 【第 10 段】飛機生成、旋轉與放置演算法
@@ -259,6 +258,13 @@ class PlaneGame:
     # ========================================================
     def on_click(self, r, c):
         if self.game_over:
+            return
+
+        if self.is_bombing:
+            self.execute_bomb_at(r, c)
+            return
+
+        if self.buttons[r][c]["state"] == tk.DISABLED:
             return
 
         self.steps += 1
@@ -339,19 +345,23 @@ class PlaneGame:
             y_current += plane_height_px + 30
 
     def use_bomb(self):
-        """炸彈功能實作"""
+        """按下炸彈按鈕：切換『轟炸模式』開關"""
         if self.bomb_available <= 0 or self.game_over:
             return
 
-        r = simpledialog.askinteger("炸彈", "輸入行 (0-9):", minvalue=0, maxvalue=9)
-        c = simpledialog.askinteger("炸彈", "輸入列 (0-9):", minvalue=0, maxvalue=9)
-        
-        if r is None or c is None:
-            return
+        if not self.is_bombing:
+            self.is_bombing = True
+            self.btn_bomb.config(text="請點擊目標...", bg="#FFCCCC", relief="sunken") # 按鈕變粉紅色提示
+        else:
+            self.is_bombing = False
+            self.btn_bomb.config(text="使用炸彈 (1)", bg="SystemButtonFace", relief="raised")
 
+    def execute_bomb_at(self, r, c):
+        """在指定座標執行轟炸 (九宮格)"""
         self.bomb_available = 0
-        self.btn_bomb.config(text="使用炸彈 (0)", state=tk.DISABLED)
-
+        self.is_bombing = False
+        self.btn_bomb.config(text="炸彈已耗盡", state=tk.DISABLED, bg="SystemButtonFace", relief="raised")
+        
         for dr in range(-1, 2):
             for dc in range(-1, 2):
                 nr, nc = r + dr, c + dc
