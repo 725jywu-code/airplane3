@@ -208,3 +208,42 @@ def ask_start_game(self):
         for i, (dx, dy) in enumerate(shape):
             nr, nc = r + dy, c + dx
             self.grid_data[nr][nc] = 'H' if i == 0 else 'B'
+
+
+def on_click(self, r, c):
+        if self.game_over:
+            return
+
+        self.steps += 1
+        self.lbl_steps.config(text=f"步數: {self.steps} / 上限: {self.max_steps}")
+
+        if self.steps > self.max_steps:
+            self.game_over = True
+            messagebox.showinfo("遊戲失敗", "超過最大步數")
+            return
+
+        self.reveal_cell(r, c)
+
+    def reveal_cell(self, r, c):
+        btn = self.buttons[r][c]
+        if btn["state"] == tk.DISABLED:
+            return
+
+        cell = self.grid_data[r][c]
+        if cell is None:
+            btn.config(bg=COLOR_MISS)
+        elif cell == 'B':
+            btn.config(bg=COLOR_BODY)
+        elif cell == 'H':
+            btn.config(bg=COLOR_HEAD, text="X")
+            self.found_heads += 1
+            self.lbl_heads.config(
+                text=f"剩餘機頭: {self.total_heads - self.found_heads}"
+            )
+            if self.found_heads == self.total_heads:
+                messagebox.showinfo("勝利", "你找到了所有飛機！")
+                self.game_over = True
+
+        btn.config(state=tk.DISABLED)
+
+
