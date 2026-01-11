@@ -11,3 +11,8 @@ COLOR_MISS = "white"        # 點到空格
 COLOR_BODY = "#5555FF"      # 飛機機身
 COLOR_HEAD = "#FF4444"      # 飛機機頭
 COLOR_TEXT = "black"
+
+class PlaneGame:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("尋找機頭 - 隨機變體版")
