@@ -159,6 +159,7 @@ class PlaneGame:
         frame_diff = tk.Frame(frame_center, bg="#F0F0F0")
         frame_diff.pack(pady=5)
 
+        # 格式：(名稱, 顏色, 步數上限)
         modes = [("簡單", "#90EE90", 40), ("一般", "#FFFFE0", 30), ("困難", "#FFB6C1", 20)]
         for text, color, _ in modes:
             tk.Radiobutton(frame_diff, text=text, variable=var_diff, value=text, indicatoron=0, width=6, height=2, selectcolor=color, font=("Microsoft JhengHei", 10)).pack(side=tk.LEFT, padx=2)
@@ -225,13 +226,18 @@ class PlaneGame:
 
     def place_planes(self, count):
         placed = 0
-        while placed < count:
+        attempts = 0 # 安全計數器，防止無限迴圈
+        while placed < count and attempts < 1000:
+            attempts += 1
             shape = self.rotate_shape(self.generate_random_shape(), random.choice([0, 90, 180, 270]))
             r, c = random.randint(0, GRID_SIZE-1), random.randint(0, GRID_SIZE-1)
             if self.is_valid_position(r, c, shape):
                 self.add_plane_to_grid(r, c, shape)
                 self.planes.append(shape)
                 placed += 1
+        
+        if placed < count:
+            print("警告：無法放置所有飛機 (嘗試次數過多)")
 
     def is_valid_position(self, r, c, shape):
         for dx, dy in shape:
@@ -263,7 +269,7 @@ class PlaneGame:
 
         if self.steps > self.max_steps:
             self.game_over = True
-            self.reveal_all_planes()  # <---【修改】步數用盡時，顯示全圖
+            self.reveal_all_planes() # 【新增】失敗時顯示全圖
             messagebox.showinfo("任務失敗", "步數已用盡，作戰失敗！")
             return
 
@@ -284,13 +290,13 @@ class PlaneGame:
             self.lbl_heads.config(text=f"剩餘目標: {self.total_heads - self.found_heads}")
             if self.found_heads == self.total_heads:
                 self.game_over = True
-                self.reveal_all_planes() # <---【修改】獲勝時，也把剩下的機身翻出來
+                self.reveal_all_planes() # 【新增】勝利時顯示全圖
                 messagebox.showinfo("任務完成", f"恭喜！您以 {self.steps} 步殲滅了所有敵機！")
 
         btn.config(state=tk.DISABLED)
 
     def reveal_all_planes(self):
-        """【新增】遊戲結束後，翻開所有飛機位置"""
+        """遊戲結束後，翻開所有飛機位置"""
         for r in range(GRID_SIZE):
             for c in range(GRID_SIZE):
                 cell = self.grid_data[r][c]
