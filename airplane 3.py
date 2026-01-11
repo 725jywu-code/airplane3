@@ -259,8 +259,7 @@ def draw_plane_previews(self):
                     x - 10, yy - 10, x + 10, yy + 10, fill=color
                 )
             y += 80
-
-    def use_bomb(self):
+ def use_bomb(self):
         if self.bomb_available <= 0 or self.game_over:
             return
 
@@ -278,4 +277,8 @@ def draw_plane_previews(self):
                 if 0 <= nr < GRID_SIZE and 0 <= nc < GRID_SIZE:
                     self.reveal_cell(nr, nc)
 
-
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.geometry("600x550")
+    PlaneGame(root)
+    root.mainloop()
