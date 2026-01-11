@@ -57,3 +57,32 @@ self.top_frame = tk.Frame(root, pady=10)
             command=self.use_bomb
         )
         self.btn_bomb.pack(side=tk.RIGHT, padx=20)
+
+        self.main_container = tk.Frame(root)
+        self.main_container.pack(expand=True, fill=tk.BOTH, padx=10, pady=10)
+
+        # 左側：遊戲棋盤
+        self.game_frame = tk.Frame(self.main_container)
+        self.game_frame.pack(side=tk.LEFT, padx=10)
+
+        self._init_grid_ui()  # 建立 10x10 棋盤按鈕
+
+        # 右側：飛機資訊
+        self.info_frame = tk.Frame(self.main_container, width=200)
+        self.info_frame.pack(side=tk.RIGHT, fill=tk.Y)
+
+        tk.Label(
+            self.info_frame,
+            text="本局敵機情報",
+            font=("Arial", 11, "bold")
+        ).pack(pady=5)
+
+        self.preview_canvas = tk.Canvas(
+            self.info_frame,
+            width=150,
+            height=400,
+            bg="#F0F0F0"
+        )
+        self.preview_canvas.pack()
+
+        self.ask_start_game()  # 啟動遊戲設定流程
