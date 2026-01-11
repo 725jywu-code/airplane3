@@ -298,33 +298,62 @@ class PlaneGame:
     # 【第 12 段】飛機預覽繪製與炸彈玩法
     # ========================================================
     def draw_plane_previews(self):
-        y = 30
+        """繪製右側的飛機預覽 (修正負座標導致的重疊問題)"""
+        self.preview_canvas.delete("all")
+        
+        y_current = 20 
+        
         for idx, shape in enumerate(self.planes):
-            self.preview_canvas.create_text(75, y, text=f"飛機 {idx + 1}")
-            y += 20
+            self.preview_canvas.create_text(
+                75, y_current, 
+                text=f"飛機 {idx + 1}", 
+                font=("Arial", 10, "bold"), 
+                fill="#333333"
+            )
+            
+            y_current += 20
+            
+            xs = [p[0] for p in shape]
+            ys = [p[1] for p in shape]
+            min_x, max_x = min(xs), max(xs)
+            min_y, max_y = min(ys), max(ys)
+            
+            plane_height_px = (max_y - min_y + 1) * PREVIEW_CELL_SIZE
+            plane_width_px = (max_x - min_x + 1) * PREVIEW_CELL_SIZE
+            
             for i, (dx, dy) in enumerate(shape):
-                x = 75 + dx * PREVIEW_CELL_SIZE
-                yy = y + dy * PREVIEW_CELL_SIZE
+                norm_x = dx - min_x
+                norm_y = dy - min_y
+                
+                cx = 75 - (plane_width_px / 2) + (norm_x * PREVIEW_CELL_SIZE) + (PREVIEW_CELL_SIZE / 2)
+                
+                cy = y_current + (norm_y * PREVIEW_CELL_SIZE) + (PREVIEW_CELL_SIZE / 2)
+                
                 color = COLOR_HEAD if i == 0 else COLOR_BODY
                 self.preview_canvas.create_rectangle(
-                    x - 10, yy - 10, x + 10, yy + 10, fill=color
+                    cx - PREVIEW_CELL_SIZE/2, cy - PREVIEW_CELL_SIZE/2,
+                    cx + PREVIEW_CELL_SIZE/2, cy + PREVIEW_CELL_SIZE/2,
+                    fill=color, outline="white"
                 )
-            y += 80
+            
+            y_current += plane_height_px + 30
 
     def use_bomb(self):
+        """炸彈功能實作"""
         if self.bomb_available <= 0 or self.game_over:
             return
 
         r = simpledialog.askinteger("炸彈", "輸入行 (0-9):", minvalue=0, maxvalue=9)
         c = simpledialog.askinteger("炸彈", "輸入列 (0-9):", minvalue=0, maxvalue=9)
+        
         if r is None or c is None:
             return
 
         self.bomb_available = 0
         self.btn_bomb.config(text="使用炸彈 (0)", state=tk.DISABLED)
 
-        for dr in range(2):
-            for dc in range(2):
+        for dr in range(-1, 2):
+            for dc in range(-1, 2):
                 nr, nc = r + dr, c + dc
                 if 0 <= nr < GRID_SIZE and 0 <= nc < GRID_SIZE:
                     self.reveal_cell(nr, nc)
