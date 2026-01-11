@@ -263,6 +263,7 @@ class PlaneGame:
 
         if self.steps > self.max_steps:
             self.game_over = True
+            self.reveal_all_planes()  # <---【修改】步數用盡時，顯示全圖
             messagebox.showinfo("任務失敗", "步數已用盡，作戰失敗！")
             return
 
@@ -283,9 +284,23 @@ class PlaneGame:
             self.lbl_heads.config(text=f"剩餘目標: {self.total_heads - self.found_heads}")
             if self.found_heads == self.total_heads:
                 self.game_over = True
+                self.reveal_all_planes() # <---【修改】獲勝時，也把剩下的機身翻出來
                 messagebox.showinfo("任務完成", f"恭喜！您以 {self.steps} 步殲滅了所有敵機！")
 
         btn.config(state=tk.DISABLED)
+
+    def reveal_all_planes(self):
+        """【新增】遊戲結束後，翻開所有飛機位置"""
+        for r in range(GRID_SIZE):
+            for c in range(GRID_SIZE):
+                cell = self.grid_data[r][c]
+                btn = self.buttons[r][c]
+                
+                # 如果是機頭或機身，不管有沒有被點過，全部顯示出來
+                if cell == 'H':
+                    btn.config(bg=COLOR_HEAD, text="X", relief="sunken", state=tk.DISABLED)
+                elif cell == 'B':
+                    btn.config(bg=COLOR_BODY, relief="sunken", state=tk.DISABLED)
 
 
     # ========================================================
