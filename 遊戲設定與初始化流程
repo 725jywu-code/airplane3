@@ -1,0 +1,48 @@
+def ask_start_game(self):
+        num = simpledialog.askinteger(
+            "遊戲設定",
+            "請輸入飛機數量 (2 或 3):",
+            minvalue=2,
+            maxvalue=3
+        )
+        if num is None:
+            return
+
+        difficulty = simpledialog.askstring(
+            "難度設定",
+            "請輸入難度 (簡單/一般/困難):"
+        )
+
+        if difficulty == "一般":
+            max_steps = 35
+        elif difficulty == "困難":
+            max_steps = 25
+        else:
+            max_steps = 50
+
+        self.start_game(num, max_steps)
+
+    def start_game(self, num_planes, max_steps):
+        # 重置遊戲狀態
+        self.max_steps = max_steps
+        self.steps = 0
+        self.total_heads = num_planes
+        self.found_heads = 0
+        self.planes.clear()
+        self.bomb_available = 1
+        self.game_over = False
+
+        # 更新 UI
+        self.lbl_steps.config(text=f"步數: 0 / 上限: {self.max_steps}")
+        self.lbl_heads.config(text=f"剩餘機頭: {self.total_heads}")
+        self.btn_bomb.config(text="使用炸彈 (1)", state=tk.NORMAL)
+        self.preview_canvas.delete("all")
+
+        # 清空棋盤
+        for r in range(GRID_SIZE):
+            for c in range(GRID_SIZE):
+                self.grid_data[r][c] = None
+                self.buttons[r][c].config(bg=COLOR_DEFAULT, state=tk.NORMAL, text="")
+
+        self.place_planes(num_planes)   # 放置飛機
+        self.draw_plane_previews()      # 繪製預覽
